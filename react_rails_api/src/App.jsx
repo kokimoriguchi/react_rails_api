@@ -1,22 +1,28 @@
-import { useState } from "react";
-import { useFetchProfiles } from "./hooks/useFetchProfiles";
+import { useState, useEffect, useContext } from "react";
+import { getMonth } from "./util";
+import { CalendarHeader } from "./components/CalendarHeader";
+import { Sidebar } from "./components/Sidebar";
+import { Month } from "./components/Month";
+import GlobalContext from "./context/GlobalContext.js";
+import { EventModal } from "./components/EventModal";
 
 export const App = () => {
-  //カスタムフックの使用
-  //関数を実行し返却値を分割代入で受け取る
-  const { userList, isLoading, isError, onClickFetchProfile } = useFetchProfiles();
-  
-  return (
-    <div>
-      <button onClick={onClickFetchProfile}>ユーザー取得</button>
-      {/*エラーの場合はエラ〜メッセージを表示 */}
-      {isError && <p style={{ color: "red" }} >エラーが発生しました</p>}
+  const [currentMonth, ] = useState(getMonth());
+  const { monthIndex, showEventModal } = useContext(GlobalContext);
 
-      {/*ローディング中は表示を切り替える */}
-      {isLoading ? (<p>データ取得中です</p>) : (userList.map(profile => (
-      <p key={profile.id}>{`${profile.id}:${profile.name} (${profile.age}歳)`}</p>
-      ))
-      )}
-    </div>
+  useEffect(() => {
+    (getMonth(monthIndex));
+  }, [monthIndex]);
+  return (
+    <>
+      {showEventModal && <EventModal />}
+      <div className="h-screen flex flex-col">
+        <CalendarHeader />
+        <div className="flex flex-1">
+          <Month month={currentMonth} />
+        </div>
+      </div>
+    </>
   );
 };
+
