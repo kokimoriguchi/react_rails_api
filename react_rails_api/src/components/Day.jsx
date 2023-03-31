@@ -1,9 +1,12 @@
-import React, { useContext } from "react"; //Component treeのどの階層であっても、Globalにデータの共有を行うことができるようになる。
+import React, { useContext, useEffect, useState } from "react"; //Component treeのどの階層であっても、Globalにデータの共有を行うことができるようになる。
 import dayjs from "dayjs";
 import GlobalContext from "../context/GlobalContext.js";
 
 export const Day = (props) => {
   const { day, rowIdx } = props;
+  const [dayEvents, setDayEvents] = useState([]);
+  const { setDaySelected, setShowEventModal, savedEvents, setSelectedEvent } =
+    useContext(GlobalContext);
 
   // 今日の日付を色付けする
   const getCurrentDayClass = () => {
@@ -12,8 +15,13 @@ export const Day = (props) => {
       : "";
   };
 
-  //日付クリックイベント定義（モーダル）
-  const { setDaySelected, setShowEventModal } = useContext(GlobalContext);
+  // 登録データを日付が一致する日に表示
+  useEffect(() => {
+    const events = savedEvents.filter(
+      (evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
+    );
+    setDayEvents(events);
+  }, [savedEvents, day]);
 
   return (
     <div className="border border-gray-200 flex flex-col">
@@ -30,7 +38,18 @@ export const Day = (props) => {
           setDaySelected(day);
           setShowEventModal(true);
         }}
-      ></div>
+      >
+
+        {dayEvents.map((evt, idx) => (
+          <div
+            key={idx}
+            onClick={() => setSelectedEvent(evt)}
+            className={`bg-neutral-200 p-1 mr-3 text-gray-600 text-sm rounded mb-1 truncate`}
+          >
+            {evt.title}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
